@@ -49,11 +49,14 @@ const GivingsTracker = () => {
   // };
 
   const getCurrentWeek = () => {
-    const startDate = new Date("2025-11-08T00:00:00+01:00");
+    const startDate = new Date("2025-11-02T00:00:00+01:00");
     const now = new Date();
+    console.log("Now: ", now)
     const diffTime = now.getTime() - startDate.getTime();
     const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
     const week = Math.floor(diffDays / 7) + 1;
+
+    console.log("Week: ", week)
     return week;
   };
 
