@@ -85,7 +85,7 @@ const GivingsTracker = () => {
               className="mx-auto m-6"
             />
             <h1 className="text-3xl md:text-4xl font-bold text-gray-800 mb-2">
-              Project Givings Tracker
+              Project 200 Tracker
             </h1>
             <div className="flex items-center justify-center gap-2 text-indigo-600">
               <Calendar className="w-5 h-5" />
