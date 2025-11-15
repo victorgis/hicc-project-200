@@ -137,7 +137,7 @@ const GivingsTracker = () => {
               </div>
             </div>
             <div className="flex justify-between mt-2 text-sm text-gray-600">
-              <span>₦0</span>
+              <span>{formatNaira(totalGiven)}</span>
               <span className="font-semibold">{formatNaira(TARGET)}</span>
             </div>
           </div>
