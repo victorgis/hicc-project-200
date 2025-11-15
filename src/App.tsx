@@ -29,14 +29,23 @@ const GivingsTracker = () => {
     }
   };
 
-  const getCurrentWeek = () => {
-    const startDate = new Date("2025-11-15T00:00:00+01:00");
-    const now = new Date();
-    const diffTime = now.getTime() - startDate.getTime();
-    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-    const week = Math.floor(diffDays / 7) + 1;
-    return week;
-  };
+  // const getCurrentWeek = () => {
+  //   const startDate = new Date("2025-11-15T00:00:00+01:00");
+  //   const now = new Date();
+  //   const diffTime = now.getTime() - startDate.getTime();
+  //   const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+  //   const week = Math.floor(diffDays / 7) + 1;
+  //   return week;
+  // };
+
+   const getCurrentWeek = () => {
+     const startDate = new Date("2025-11-08T00:00:00+01:00");
+     const now = new Date();
+     const diffTime = now.getTime() - startDate.getTime();
+     const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+     const week = Math.floor(diffDays / 7) + 1;
+     return week;
+   };
 
   useEffect(() => {
     const fetchData = async () => {
