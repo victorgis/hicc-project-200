@@ -79,7 +79,7 @@ const GivingsTracker = () => {
         <div className="bg-white rounded-2xl shadow-xl p-6 md:p-8 mb-6">
           <div className="text-center mb-8">
             <img
-              src="../public/logo.png"
+              src="https://hiccproject200.vercel.app/faviconizm.png"
               width={85}
               height={"auto"}
               className="mx-auto m-6"
