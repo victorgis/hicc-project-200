@@ -1,5 +1,13 @@
 import { useState, useEffect } from "react";
 import { TrendingUp, Calendar, Target, DollarSign } from "lucide-react";
+import {
+  PieChart,
+  Pie,
+  Cell,
+  ResponsiveContainer,
+  Legend,
+  Tooltip,
+} from "recharts";
 
 const GivingsTracker = () => {
   const [data, setData] = useState<Array<{ weeks: string; amount: number; change: number }>>([]);
@@ -66,10 +74,45 @@ const GivingsTracker = () => {
     }).format(amount);
   };
 
+  // const formatNaira = (amount: number | bigint | string | null | undefined) => {
+  //   let value: number | bigint = 0;
+  //   if (typeof amount === "bigint") {
+  //     value = amount;
+  //   } else if (typeof amount === "number") {
+  //     value = amount;
+  //   } else if (typeof amount === "string") {
+  //     const numeric = parseFloat(amount.replace(/[^0-9.-]+/g, ""));
+  //     value = Number.isNaN(numeric) ? 0 : numeric;
+  //   } else {
+  //     value = 0;
+  //   }
+  //   return new Intl.NumberFormat("en-NG", {
+  //     style: "currency",
+  //     currency: "NGN",
+  //     minimumFractionDigits: 0,
+  //   }).format(value as number | bigint);
+  // };
+
   const currentWeekData = data.find((d) => d.weeks === `Week ${currentWeek}`);
   const totalGiven = currentWeekData ? currentWeekData.amount : 0;
   const remaining = currentWeekData ? currentWeekData.change : TARGET;
   const progress = (totalGiven / TARGET) * 100;
+
+  const pieChartData = [
+    { name: "Total Given", value: totalGiven, color: "#10b981" },
+    { name: "Remaining", value: remaining, color: "#f97316" },
+  ];
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-indigo-600 mx-auto mb-4"></div>
+          <p className="text-gray-600 text-lg">Loading givings data...</p>
+        </div>
+      </div>
+    );
+  }
 
   if (loading) {
     return (
@@ -149,6 +192,39 @@ const GivingsTracker = () => {
               <span>{formatNaira(totalGiven)}</span>
               <span className="font-semibold">{formatNaira(TARGET)}</span>
             </div>
+          </div>
+
+          <div className="mb-8 bg-gradient-to-br from-gray-50 to-slate-50 p-6 rounded-xl border border-gray-200">
+            <h3 className="text-lg font-semibold text-gray-700 mb-4 text-center">
+              Given vs Remaining
+            </h3>
+            <ResponsiveContainer width="100%" height={300}>
+              <PieChart>
+                <Pie
+                  data={pieChartData}
+                  cx="50%"
+                  cy="50%"
+                  labelLine={false}
+                  label={({ name, percent }) =>
+                    `${name}: ${((percent ?? 0) * 100).toFixed(1)}%`
+                  }
+                  outerRadius={100}
+                  fill="#8884d8"
+                  dataKey="value"
+                >
+                  {pieChartData.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={entry.color} />
+                  ))}
+                </Pie>
+                <Tooltip formatter={(value) => formatNaira(Number(value))} />
+                <Legend
+                  formatter={(value, entry) => {
+                    const payloadValue = entry?.payload?.value ?? 0;
+                    return `${value}: ${formatNaira(payloadValue)}`;
+                  }}
+                />
+              </PieChart>
+            </ResponsiveContainer>
           </div>
 
           <div className="bg-gradient-to-r from-indigo-50 to-purple-50 p-6 rounded-xl border border-indigo-200">
