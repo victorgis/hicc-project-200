@@ -102,9 +102,8 @@ const GivingsTracker = () => {
 
   const pieChartData = [
     { name: "Total Given", value: totalGiven, color: "#10b981" },
-    { name: "Remaining", value: remaining, color: "#f97316" },
+    { name: "Remaining", value: remaining, color: "#aa80ff" },
   ];
-
 
   if (loading) {
     return (
