@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { TrendingUp, Calendar, Target, DollarSign } from "lucide-react";
 
 const GivingsTracker = () => {
-  const [data, setData] = useState([]);
+  const [data, setData] = useState<Array<{ weeks: string; amount: number; change: number }>>([]);
   const [loading, setLoading] = useState(true);
   const [currentWeek, setCurrentWeek] = useState(1);
   const TARGET = 200000000;
@@ -32,7 +32,7 @@ const GivingsTracker = () => {
   const getCurrentWeek = () => {
     const startDate = new Date("2025-11-15T00:00:00+01:00");
     const now = new Date();
-    const diffTime = now - startDate;
+    const diffTime = now.getTime() - startDate.getTime();
     const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
     const week = Math.floor(diffDays / 7) + 1;
     return week;
@@ -49,7 +49,7 @@ const GivingsTracker = () => {
     fetchData();
   }, []);
 
-  const formatNaira = (amount) => {
+  const formatNaira = (amount: number | bigint) => {
     return new Intl.NumberFormat("en-NG", {
       style: "currency",
       currency: "NGN",
