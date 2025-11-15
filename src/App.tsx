@@ -10,7 +10,9 @@ import {
 } from "recharts";
 
 const GivingsTracker = () => {
-  const [data, setData] = useState<Array<{ weeks: string; amount: number; change: number }>>([]);
+  const [data, setData] = useState<
+    Array<{ weeks: string; amount: number; change: number }>
+  >([]);
   const [loading, setLoading] = useState(true);
   const [currentWeek, setCurrentWeek] = useState(1);
   const TARGET = 200000000;
@@ -46,14 +48,14 @@ const GivingsTracker = () => {
   //   return week;
   // };
 
-   const getCurrentWeek = () => {
-     const startDate = new Date("2025-11-08T00:00:00+01:00");
-     const now = new Date();
-     const diffTime = now.getTime() - startDate.getTime();
-     const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-     const week = Math.floor(diffDays / 7) + 1;
-     return week;
-   };
+  const getCurrentWeek = () => {
+    const startDate = new Date("2025-11-08T00:00:00+01:00");
+    const now = new Date();
+    const diffTime = now.getTime() - startDate.getTime();
+    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+    const week = Math.floor(diffDays / 7) + 1;
+    return week;
+  };
 
   useEffect(() => {
     const fetchData = async () => {
@@ -102,6 +104,7 @@ const GivingsTracker = () => {
     { name: "Total Given", value: totalGiven, color: "#10b981" },
     { name: "Remaining", value: remaining, color: "#f97316" },
   ];
+
 
   if (loading) {
     return (
@@ -199,12 +202,15 @@ const GivingsTracker = () => {
               Given vs Remaining
             </h3>
             <ResponsiveContainer width="100%" height={300}>
-              <PieChart>
+              <PieChart responsive={true} dataKey={1000}>
                 <Pie
                   data={pieChartData}
                   cx="50%"
                   cy="50%"
                   labelLine={false}
+                  //to swap location
+                  startAngle={180}
+                  endAngle={-180}
                   label={({ name, percent }) =>
                     `${name}: ${((percent ?? 0) * 100).toFixed(1)}%`
                   }
@@ -217,7 +223,16 @@ const GivingsTracker = () => {
                   ))}
                 </Pie>
                 <Tooltip formatter={(value) => formatNaira(Number(value))} />
+                {/* <Legend
+                  formatter={(value, entry) => {
+                    const payloadValue = entry?.payload?.value ?? 0;
+                    return `${value}: ${formatNaira(payloadValue)}`;
+                  }}
+                /> */}
                 <Legend
+                  align="center"
+                  verticalAlign="bottom"
+                  layout="horizontal"
                   formatter={(value, entry) => {
                     const payloadValue = entry?.payload?.value ?? 0;
                     return `${value}: ${formatNaira(payloadValue)}`;
