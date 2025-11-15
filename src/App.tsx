@@ -105,6 +105,11 @@ const GivingsTracker = () => {
     { name: "Remaining", value: remaining, color: "#aa80ff" },
   ];
 
+  // const pieChartData = [
+  //   { name: "Remaining", value: remaining, color: "#aa80ff" },
+  //   { name: "Total Given", value: totalGiven, color: "#10b981" },
+  // ];
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
@@ -201,13 +206,12 @@ const GivingsTracker = () => {
               Given vs Remaining
             </h3>
             <ResponsiveContainer width="100%" height={300}>
-              <PieChart responsive={true} dataKey={1000}>
+              <PieChart>
                 <Pie
                   data={pieChartData}
                   cx="50%"
                   cy="50%"
                   labelLine={false}
-                  //to swap location
                   startAngle={180}
                   endAngle={-180}
                   label={({ name, percent }) =>
@@ -218,20 +222,17 @@ const GivingsTracker = () => {
                   dataKey="value"
                 >
                   {pieChartData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.color} />
+                    <Cell key={index} fill={entry.color} /> //`cell-${index}`
                   ))}
+                  {/* {reversedPieData.map((entry, index) => (
+                    <Cell key={index} fill={entry.color} />
+                  ))} */}
                 </Pie>
                 <Tooltip formatter={(value) => formatNaira(Number(value))} />
-                {/* <Legend
-                  formatter={(value, entry) => {
-                    const payloadValue = entry?.payload?.value ?? 0;
-                    return `${value}: ${formatNaira(payloadValue)}`;
-                  }}
-                /> */}
                 <Legend
                   align="center"
                   verticalAlign="bottom"
-                  layout="horizontal"
+                  layout="vertical"
                   formatter={(value, entry) => {
                     const payloadValue = entry?.payload?.value ?? 0;
                     return `${value}: ${formatNaira(payloadValue)}`;
