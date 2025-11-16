@@ -11,7 +11,7 @@ import {
 
 const GivingsTracker = () => {
   const [data, setData] = useState<
-    Array<{ weeks: string; amount: number; change: number }>
+    Array<{ weeks: string; amount: number; change: number; cumm: number }>
   >([]);
   const [loading, setLoading] = useState(true);
   const [currentWeek, setCurrentWeek] = useState(1);
@@ -25,11 +25,12 @@ const GivingsTracker = () => {
       const csvText = await res.text();
       const rows = csvText.trim().split("\n");
       const parsedData = rows.slice(1).map((row) => {
-        const [weeks, amount, change] = row.split(",");
+        const [weeks, amount, change, cumm] = row.split(",");
         return {
           weeks: weeks,
           amount: parseFloat(amount),
           change: parseFloat(change),
+          cumm: parseFloat(cumm),
         };
       });
       return parsedData;
@@ -65,6 +66,7 @@ const GivingsTracker = () => {
       setLoading(true);
       const result = await givingsTracker();
       setData(result);
+      // console.log("result: ", result)
       setCurrentWeek(getCurrentWeek());
       setLoading(false);
     };
@@ -99,7 +101,7 @@ const GivingsTracker = () => {
   // };
 
   const currentWeekData = data.find((d) => d.weeks === `Week ${currentWeek}`);
-  const totalGiven = currentWeekData ? currentWeekData.amount : 0;
+  const totalGiven = currentWeekData ? currentWeekData.cumm : 0;
   const remaining = currentWeekData ? currentWeekData.change : TARGET;
   const progress = (totalGiven / TARGET) * 100;
 
