@@ -16,7 +16,9 @@ import {
 } from "recharts";
 
 const GivingsTracker = () => {
-  const [data, setData] = useState([]);
+  const [data, setData] = useState<
+    Array<{ weeks: string; amount: number; change: number; cumm: number }>
+  >([]);
   const [loading, setLoading] = useState(true);
 
   // currentWeek tracks the actual date-based week (max limit)
@@ -33,15 +35,18 @@ const GivingsTracker = () => {
       );
       const csvText = await res.text();
       const rows = csvText.trim().split("\n");
-      const parsedData = rows.slice(1).map((row) => {
-        const [weeks, amount, change, cumm] = row.split(",");
-        return {
-          weeks: weeks,
-          amount: parseFloat(amount),
-          change: parseFloat(change),
-          cumm: parseFloat(cumm),
-        };
-      });
+      const parsedData = rows
+        .slice(1)
+        .map((row) => {
+          const [weeks, amount, change, cumm] = row.split(",");
+          return {
+            weeks: weeks,
+            amount: parseFloat(amount),
+            change: parseFloat(change),
+            cumm: parseFloat(cumm),
+          };
+        })
+        .filter((item) => item.weeks && !isNaN(item.amount)); // Filter out empty or incomplete rows
       return parsedData;
     } catch (err) {
       console.error("Error fetching data:", err);
@@ -80,7 +85,7 @@ const GivingsTracker = () => {
     fetchData();
   }, []);
 
-  const formatNaira = (amount) => {
+  const formatNaira = (amount: number | bigint) => {
     return new Intl.NumberFormat("en-NG", {
       style: "currency",
       currency: "NGN",
@@ -102,7 +107,7 @@ const GivingsTracker = () => {
     { name: "Remaining", value: remaining, color: "#aa80ff" },
   ];
 
-  const handleWeekChange = (e) => {
+  const handleWeekChange = (e: { target: { value: unknown } }) => {
     setSelectedWeek(Number(e.target.value));
   };
 
@@ -134,7 +139,7 @@ const GivingsTracker = () => {
             </h1>
 
             {/* Week Selector Dropdown */}
-            <div className="flex items-center justify-center gap-2 text-indigo-600 relative inline-flex mx-auto mt-4 bg-indigo-50 px-4 py-2 rounded-lg cursor-pointer hover:bg-indigo-100 transition-colors">
+            <div className="items-center justify-center gap-2 text-indigo-600 relative inline-flex mx-auto mt-4 bg-indigo-50 px-4 py-2 rounded-lg cursor-pointer hover:bg-indigo-100 transition-colors">
               <Calendar className="w-5 h-5" />
               <div className="relative">
                 <select
@@ -142,14 +147,16 @@ const GivingsTracker = () => {
                   onChange={handleWeekChange}
                   className="appearance-none bg-transparent text-lg font-semibold text-indigo-700 pr-6 focus:outline-none cursor-pointer"
                 >
-                  {data.map((_, index) => {
-                    const weekNum = index + 1;
-                    return (
-                      <option key={index} value={weekNum}>
-                        Week {weekNum}
-                      </option>
-                    );
-                  })}
+                  {data
+                    .filter((_, index) => index + 1 <= currentWeek) // Only show weeks up to the current calendar week
+                    .map((week, index) => {
+                      const weekNum = index + 1;
+                      return (
+                        <option key={index} value={weekNum}>
+                          {week.weeks}
+                        </option>
+                      );
+                    })}
                 </select>
                 <ChevronDown className="w-4 h-4 absolute right-0 top-1/2 -translate-y-1/2 pointer-events-none" />
               </div>
