@@ -1,11 +1,5 @@
 import { useState, useEffect } from "react";
-import {
-  TrendingUp,
-  Calendar,
-  Target,
-  DollarSign,
-  ChevronDown,
-} from "lucide-react";
+import { TrendingUp, Calendar, Target, DollarSign } from "lucide-react";
 import {
   PieChart,
   Pie,
@@ -16,14 +10,11 @@ import {
 } from "recharts";
 
 const GivingsTracker = () => {
-  const [data, setData] = useState([]);
+  const [data, setData] = useState<
+    Array<{ weeks: string; amount: number; change: number; cumm: number }>
+  >([]);
   const [loading, setLoading] = useState(true);
-
-  // currentWeek tracks the actual date-based week (max limit)
   const [currentWeek, setCurrentWeek] = useState(1);
-  // selectedWeek tracks what the user wants to see
-  const [selectedWeek, setSelectedWeek] = useState(1);
-
   const TARGET = 200000000;
 
   const givingsTracker = async () => {
@@ -52,9 +43,12 @@ const GivingsTracker = () => {
   const getCurrentWeek = () => {
     const startDate = new Date("2025-11-02T00:00:00+01:00");
     const now = new Date();
+    console.log("Now: ", now)
     const diffTime = now.getTime() - startDate.getTime();
     const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
     const week = Math.floor(diffDays / 7) + 1;
+
+    console.log("Week: ", week)
     return week;
   };
 
@@ -63,24 +57,14 @@ const GivingsTracker = () => {
       setLoading(true);
       const result = await givingsTracker();
       setData(result);
-
-      const calculatedWeek = getCurrentWeek();
-      setCurrentWeek(calculatedWeek);
-
-      // Default the display to the current date-based week
-      // Ensure we don't select a week that doesn't exist in data yet
-      const maxDataWeek = result.length;
-      const initialViewWeek =
-        calculatedWeek > maxDataWeek ? maxDataWeek : calculatedWeek;
-
-      setSelectedWeek(initialViewWeek > 0 ? initialViewWeek : 1);
-
+      // console.log("result: ", result)
+      setCurrentWeek(getCurrentWeek());
       setLoading(false);
     };
     fetchData();
   }, []);
 
-  const formatNaira = (amount) => {
+  const formatNaira = (amount: number | bigint) => {
     return new Intl.NumberFormat("en-NG", {
       style: "currency",
       currency: "NGN",
@@ -88,13 +72,9 @@ const GivingsTracker = () => {
     }).format(amount);
   };
 
-  // Find data based on user selection
-  const currentWeekData = data.find((d) => d.weeks === `Week ${selectedWeek}`);
-
-  // Use selected week data, fall back to 0 if data missing
+  const currentWeekData = data.find((d) => d.weeks === `Week ${currentWeek}`);
   const totalGiven = currentWeekData ? currentWeekData.cumm : 0;
-  // If viewing previous weeks, the 'remaining' should be based on that week's cumulative
-  const remaining = currentWeekData ? TARGET - currentWeekData.cumm : TARGET;
+  const remaining = currentWeekData ? currentWeekData.change : TARGET;
   const progress = (totalGiven / TARGET) * 100;
 
   const pieChartData = [
@@ -102,9 +82,16 @@ const GivingsTracker = () => {
     { name: "Remaining", value: remaining, color: "#aa80ff" },
   ];
 
-  const handleWeekChange = (e) => {
-    setSelectedWeek(Number(e.target.value));
-  };
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-indigo-600 mx-auto mb-4"></div>
+          <p className="text-gray-600 text-lg">Loading givings data...</p>
+        </div>
+      </div>
+    );
+  }
 
   if (loading) {
     return (
@@ -127,38 +114,14 @@ const GivingsTracker = () => {
               width={85}
               height={"auto"}
               className="mx-auto m-6"
-              alt="Project Logo"
             />
             <h1 className="text-3xl md:text-4xl font-bold text-gray-800 mb-2">
               Project 200 Tracker
             </h1>
-
-            {/* Week Selector Dropdown */}
-            <div className="flex items-center justify-center gap-2 text-indigo-600 relative inline-flex mx-auto mt-4 bg-indigo-50 px-4 py-2 rounded-lg cursor-pointer hover:bg-indigo-100 transition-colors">
+            <div className="flex items-center justify-center gap-2 text-indigo-600">
               <Calendar className="w-5 h-5" />
-              <div className="relative">
-                <select
-                  value={selectedWeek}
-                  onChange={handleWeekChange}
-                  className="appearance-none bg-transparent text-lg font-semibold text-indigo-700 pr-6 focus:outline-none cursor-pointer"
-                >
-                  {data.map((_, index) => {
-                    const weekNum = index + 1;
-                    return (
-                      <option key={index} value={weekNum}>
-                        Week {weekNum}
-                      </option>
-                    );
-                  })}
-                </select>
-                <ChevronDown className="w-4 h-4 absolute right-0 top-1/2 -translate-y-1/2 pointer-events-none" />
-              </div>
+              <p className="text-lg font-semibold">Week {currentWeek}</p>
             </div>
-            {selectedWeek !== currentWeek && (
-              <p className="text-xs text-gray-500 mt-2">
-                Viewing past data (Current: Week {currentWeek})
-              </p>
-            )}
           </div>
 
           <div className="grid md:grid-cols-2 gap-6 mb-8">
@@ -166,7 +129,7 @@ const GivingsTracker = () => {
               <div className="flex items-center gap-3 mb-2">
                 <DollarSign className="w-6 h-6 text-green-600" />
                 <h3 className="text-sm font-semibold text-gray-600 uppercase">
-                  Total Given (Week {selectedWeek})
+                  Total Given
                 </h3>
               </div>
               <p className="text-3xl font-bold text-green-700">
@@ -231,8 +194,11 @@ const GivingsTracker = () => {
                   dataKey="value"
                 >
                   {pieChartData.map((entry, index) => (
-                    <Cell key={index} fill={entry.color} />
+                    <Cell key={index} fill={entry.color} /> //`cell-${index}`
                   ))}
+                  {/* {reversedPieData.map((entry, index) => (
+                    <Cell key={index} fill={entry.color} />
+                  ))} */}
                 </Pie>
                 <Tooltip formatter={(value) => formatNaira(Number(value))} />
                 <Legend
@@ -254,28 +220,27 @@ const GivingsTracker = () => {
             </h3>
             <div className="space-y-3">
               {data.map((week, idx) => {
-                // Highlight the SELECTED week, not just the current date week
-                const isSelectedWeek = week.weeks === `Week ${selectedWeek}`;
+                const isCurrentWeek = week.weeks === `Week ${currentWeek}`;
                 return (
                   <div
                     key={idx}
-                    className={`p-4 rounded-lg transition-all duration-200 ${
-                      isSelectedWeek
-                        ? "bg-indigo-100 border-2 border-indigo-400 transform scale-[1.02]"
-                        : "bg-white border border-gray-200 opacity-80 hover:opacity-100"
+                    className={`p-4 rounded-lg ${
+                      isCurrentWeek
+                        ? "bg-indigo-100 border-2 border-indigo-400"
+                        : "bg-white border border-gray-200"
                     }`}
                   >
                     <div className="flex justify-between items-center">
                       <span
                         className={`font-semibold ${
-                          isSelectedWeek ? "text-indigo-700" : "text-gray-700"
+                          isCurrentWeek ? "text-indigo-700" : "text-gray-700"
                         }`}
                       >
-                        {week.weeks} {isSelectedWeek && "(Selected)"}
+                        {week.weeks} {isCurrentWeek && "(Current)"}
                       </span>
                       <span
                         className={`font-bold ${
-                          isSelectedWeek ? "text-indigo-600" : "text-gray-600"
+                          isCurrentWeek ? "text-indigo-600" : "text-gray-600"
                         }`}
                       >
                         {formatNaira(week.amount)}
@@ -290,8 +255,8 @@ const GivingsTracker = () => {
 
         <div className="text-center text-gray-600 text-sm">
           <p>
-            Target: {formatNaira(TARGET)} • Viewing Week {selectedWeek} of{" "}
-            {data.length}
+            Target: {formatNaira(TARGET)} • Updates automatically based on
+            current week
           </p>
         </div>
       </div>
